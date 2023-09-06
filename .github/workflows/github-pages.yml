@@ -1,15 +1,33 @@
-name: Deploy to GitHub Pages
+name: Build and deploy jekyll site
 
 on:
   push:
     branches:
-      - master
+      - main
+
+  workflow_dispatch:
 
 jobs:
-  github-pages:
+  jekyll:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v2
-      - uses:  helaili/jekyll-action@v2
+      - name: 📂 setup
+        uses: actions/checkout@v3
+
+      - name: 🎁 Cache Ruby gems
+        uses: actions/cache@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          path: vendor/bundle
+          key: $-gems-$
+          restore-keys: |
+            $-gems-
+
+      - name: 🚀 Build and deploy
+        uses: helaili/jekyll-action@v2
+        with:
+          token: $
+          jekyll_src: "jekyll"
+          target_branch: "gh-pages"
+          pre_build_commands: "gem update --system"
